@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0">
+    <meta name="p:domain_verify" content="80def3e42567332760da77555f04e7d7" />
+
+    <!-- SEO Meta Tags -->
+    <title>Chobir Deyal - Premium Photo Gallery</title>
+    <meta name="description" content="Chobir Deyal ">
+    <meta name="keywords" content="photo gallery, chobir deyal, photography, poses, kolkata">
+    <meta name="author" content="Chobir Deyal">
+    <meta name="theme-color" content="#6366f1">
+
+    <!-- Open Graph -->
+    <meta property="og:title" content="Chobir Deyal - Photo Gallery">
+    <meta property="og:description" content="Premium Photo Gallery - Browse and download beautiful photos">
+    <meta property="og:type" content="website">
+
+    <!-- Favicon -->
+    <link rel="icon"
+        href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🖼️</text></svg>">
+
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+    <!-- Stylesheet -->
+    <link rel="stylesheet" href="styles.css">
+</head>
+
+<body>
+    <!-- Theme Toggle Button -->
+    <button class="theme-toggle" id="themeToggle" aria-label="Toggle theme">🌙</button>
+
+    <!-- Header Section -->
+    <header class="page-title compact">
+        <h1>Chobir Deyal</h1>
+        <!-- Filter Buttons -->
+        <nav class="filters" aria-label="Photo categories">
+            <button class="filter-btn active" data-category="all">All</button>
+            <button class="filter-btn" data-category="popular">🔥 Popular</button>
+            <button class="filter-btn" data-category="kolkata">Kolkata</button>
+            <button class="filter-btn" data-category="poses">Poses</button>
+            <button class="filter-btn" data-category="photography">Photography</button>
+        </nav>
+    </header>
+
+
+    <!-- Gallery Grid -->
+    <main class="gallery" id="gallery" role="main">
+        <div class="loading">
+            <div class="loading-spinner"></div>
+            <p>Loading...</p>
+        </div>
+    </main>
+
+    <!-- Loading Trigger (Sentinel) -->
+    <div id="loadingSentinel" class="loading-sentinel">
+        <div class="loading-spinner small"></div>
+    </div>
+
+
+    <!-- Pagination -->
+    <nav class="pagination" id="pagination" aria-label="Page navigation">
+        <button class="page-btn" id="prevBtn" aria-label="Previous page">← Previous</button>
+        <span class="page-info" id="pageInfo">Page 1</span>
+        <button class="page-btn" id="nextBtn" aria-label="Next page">Next →</button>
+    </nav>
+
+    <!-- Modal -->
+    <div class="modal" id="modal" role="dialog" aria-modal="true" aria-label="Image viewer">
+        <div class="modal-content">
+            <!-- Close Button -->
+            <button class="close-modal" id="closeModal" aria-label="Close modal">&times;</button>
+
+            <!-- Navigation Buttons -->
+            <button class="modal-nav prev" id="modalPrev" aria-label="Previous image">‹</button>
+            <button class="modal-nav next" id="modalNext" aria-label="Next image">›</button>
+
+            <!-- Image -->
+            <img id="modalImage" src="" alt="Full size image">
+
+            <!-- Photo Counter -->
+            <div class="photo-counter" id="photoCounter">1 / 100</div>
+
+            <!-- Action Buttons -->
+            <button class="share-btn" id="shareBtn" aria-label="Share image">📤</button>
+            <button class="download-btn" id="downloadBtn">
+                <span>⬇️</span>
+                <span></span>
+            </button>
+        </div>
+    </div>
+
+    <!-- Stats Section -->
+    <div class="stats-container">
+        <div class="stats" id="stats">Loading...</div>
+    </div>
+
+    <!-- Scroll to Top Button -->
+    <button class="scroll-top-btn" id="scrollTopBtn" aria-label="Scroll to top">↑</button>
+
+    <!-- App Install Modal -->
+    <div class="install-modal" id="installModal" role="dialog" aria-modal="true" aria-label="Install App">
+        <div class="install-modal-content">
+            <button class="close-modal install-close" id="closeInstallModal" aria-label="Close">&times;</button>
+            <div class="install-icon">
+                <svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100' width="60" height="60"><text y='.9em'
+                        font-size='90'>🖼️</text></svg>
+            </div>
+            <h2 class="install-title">Install Chobir Deyal</h2>
+            <p class="install-desc">Get the app on your device for a faster, full-screen experience and offline access!
+            </p>
+
+            <!-- Dynamic Actions based on OS/Browser -->
+            <div id="installActions" class="install-actions">
+                <button class="install-btn primary" id="installAppBtn">Install App</button>
+            </div>
+
+            <div id="iosInstallInstruction" class="ios-instruction" style="display: none;">
+                <p>To install on iOS:</p>
+                <ol>
+                    <li>Tap the <strong>Share</strong> button <span class="share-icon-inline">⎙</span> at the bottom
+                    </li>
+                    <li>Select <strong>Add to Home Screen</strong> <span class="plus-icon-inline">➕</span></li>
+                </ol>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="algoridom.js"></script>
+</body>
+
+</html>
