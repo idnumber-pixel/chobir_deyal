@@ -1359,6 +1359,7 @@ body::before {
             <button class="filter-btn" data-category="poses">Poses</button>
             <button class="filter-btn" data-category="photography">Photography</button>
             <button class="filter-btn" data-category="others">Others</button>
+            <button class="filter-btn" data-category="database">🗄️ Database</button>
         </nav>
     </header>
 
@@ -1901,6 +1902,12 @@ function sanitizeImageUrl(url) {
     return url;
 }
 
+function isValidUrl(url) {
+    if (!url || typeof url !== 'string') return false;
+    const s = url.trim();
+    return s.startsWith('http://') || s.startsWith('https://') || s.startsWith('//');
+}
+
 /**
  * Preload images for next pages
  */
@@ -2031,7 +2038,7 @@ async function fetchTableData(tableName) {
                     clicks: typeof countData === 'object' ? (countData.clicks || 0) : (countData || 0),
                     views: typeof countData === 'object' ? (countData.views || 0) : 0
                 };
-            }).filter(item => item.thumbnail_url);
+            }).filter(item => isValidUrl(item.thumbnail_url));
         }
 
         // Fallback: no thumbnail CSV – use main CSV URLs for both
@@ -2054,7 +2061,7 @@ async function fetchTableData(tableName) {
                 clicks: typeof countData === 'object' ? (countData.clicks || 0) : (countData || 0),
                 views: typeof countData === 'object' ? (countData.views || 0) : 0
             };
-        }).filter(item => item.image_url);
+        }).filter(item => isValidUrl(item.image_url));
     } catch (error) {
         console.warn(`Fetch ${tableName} error:`, error);
         return [];
@@ -2079,11 +2086,11 @@ async function fetchSupabaseData() {
         const data = await response.json();
         console.log('Supabase raw items:', data.length);
         if (data.length > 0) console.log('Supabase first item sample:', data[0]);
-        const validCategories = ['kolkata', 'poses', 'photography'];
+        const validCategories = ['kolkata', 'poses', 'photography', 'pose'];
 
         return data.map(item => {
             const section = (item.section || '').toLowerCase().trim();
-            const category = validCategories.includes(section) ? section : 'others';
+            const category = validCategories.includes(section) ? (section === 'pose' ? 'poses' : section) : 'others';
             
             // Priority: thumbnail_url > image_url
             const thumbUrl = sanitizeImageUrl(item.thumbnail_url || item.image_url);
@@ -2105,7 +2112,7 @@ async function fetchSupabaseData() {
                 clicks: typeof countData === 'object' ? (countData.clicks || 0) : (countData || 0),
                 views: typeof countData === 'object' ? (countData.views || 0) : 0
             };
-        }).filter(item => item.thumbnail_url);
+        }).filter(item => isValidUrl(item.thumbnail_url));
     } catch (error) {
         console.error('Supabase error:', error);
         return [];
@@ -2138,7 +2145,8 @@ async function loadAllPhotos() {
             supabasePromise
         ]);
 
-        const combined = [...results.flat(), ...supabaseData];
+        // Supabase first so its items take priority during dedup
+        const combined = [...supabaseData, ...results.flat()];
 
         // deduplicate by image_url
         const seen = new Set();
@@ -2178,17 +2186,20 @@ const SHUFFLE_ALGORITHMS = {
     smartPersonalized: (arr) => smartPersonalizedShuffle(arr)
 };
 
-function shufflePhotos(algorithm = 'smartPersonalized') {
+function shufflePhotos(algorithm = 'smartPersonalized', strictFilter = false) {
     const shuffleFn = SHUFFLE_ALGORITHMS[algorithm] || SHUFFLE_ALGORITHMS.smartPersonalized;
     const baseShuffled = shuffleFn(AppState.filteredPhotos);
 
-    // Favorites repetition logic
-    const favorites = [...AppState.allPhotos]
-        .sort((a, b) => (b.clicks || 0) - (a.clicks || 0))
-        .slice(0, 50);
-
-    // Store the full sequence
-    AppState.fullPhotoSequence = [...baseShuffled, ...favorites];
+    if (strictFilter) {
+        // strict mode: never append photos outside the filtered set
+        AppState.fullPhotoSequence = [...baseShuffled];
+    } else {
+        // normal mode: append popular photos for better experience
+        const favorites = [...AppState.allPhotos]
+            .sort((a, b) => (b.clicks || 0) - (a.clicks || 0))
+            .slice(0, 50);
+        AppState.fullPhotoSequence = [...baseShuffled, ...favorites];
+    }
 
     // Reset paging
     AppState.currentPage = 1;
@@ -2213,6 +2224,18 @@ function filterByCategory(category) {
         });
         AppState.filteredPhotos = allByPopularity;
         AppState.fullPhotoSequence = allByPopularity;
+    } else if (category === 'database') {
+        // Show ONLY Supabase data — strictly, no favorites appended
+        AppState.filteredPhotos = AppState.allPhotos.filter(
+            photo => photo.tableName === 'supabase'
+        );
+        shufflePhotos('random', true); // strict=true
+    } else if (category === 'others') {
+        // Show ONLY Supabase items that don't match main categories — strictly
+        AppState.filteredPhotos = AppState.allPhotos.filter(
+            photo => photo.tableName === 'supabase' && photo.category === 'others'
+        );
+        shufflePhotos('random', true); // strict=true
     } else {
         AppState.filteredPhotos = AppState.allPhotos.filter(
             photo => photo.category === category
